@@ -33,6 +33,9 @@ func main() {
 	} else {
 		   fmt.Println("newrelic init success")
 	}
+	http.HandleFunc(newrelic.WrapHandleFunc(app, "/users", usersHandler))
+	txn := app.StartTransaction("transaction_name")
+	defer txn.End()
 	  
 
 	mux := setup()
