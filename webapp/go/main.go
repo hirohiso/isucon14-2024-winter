@@ -24,19 +24,15 @@ func main() {
 	var app *newrelic.Application
 	var err error
 	app, err := newrelic.NewApplication(
-	　　newrelic.ConfigAppName(os.Getenv("NEW_RELIC_APP_NAME")),
-	　　newrelic.ConfigLicense(os.Getenv("NEW_RELIC_LICENSE_KEY")),
-		   newrelic.ConfigAppLogEnabled(false),
+		newrelic.ConfigAppName(os.Getenv("NEW_RELIC_APP_NAME")),
+		newrelic.ConfigLicense(os.Getenv("NEW_RELIC_LICENSE_KEY")),
+		newrelic.ConfigAppLogEnabled(false),
 	)
 	if err != nil {
 		   fmt.Errorf("failed to init newrelic NewApplication reason: %v", err)
 	} else {
 		   fmt.Println("newrelic init success")
-	}
-	http.HandleFunc(newrelic.WrapHandleFunc(app, "/users", usersHandler))
-	txn := app.StartTransaction("transaction_name")
-	defer txn.End()
-	  
+	} 
 
 	mux := setup()
 	slog.Info("Listening on :8080")
