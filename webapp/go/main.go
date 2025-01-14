@@ -21,13 +21,12 @@ import (
 var db *sqlx.DB
 
 func main() {
-	var app *newrelic.Application
-	var err error
 	app, err := newrelic.NewApplication(
 		newrelic.ConfigAppName(os.Getenv("NEW_RELIC_APP_NAME")),
 		newrelic.ConfigLicense(os.Getenv("NEW_RELIC_LICENSE_KEY")),
-		newrelic.ConfigAppLogEnabled(false),
-	)
+		newrelic.ConfigAppLogForwardingEnabled(true),
+	  )
+	  
 	if err != nil {
 		   fmt.Errorf("failed to init newrelic NewApplication reason: %v", err)
 	} else {
