@@ -21,7 +21,9 @@ import (
 var db *sqlx.DB
 
 func main() {
-	app, err := newrelic.NewApplication(
+	var app *newrelic.Application
+	var err error
+	app, err = newrelic.NewApplication(
 		newrelic.ConfigAppName(os.Getenv("NEW_RELIC_APP_NAME")),
 		newrelic.ConfigLicense(os.Getenv("NEW_RELIC_LICENSE_KEY")),
 		newrelic.ConfigAppLogForwardingEnabled(true),
