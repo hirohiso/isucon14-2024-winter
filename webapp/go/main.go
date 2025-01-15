@@ -39,6 +39,26 @@ func main() {
 	http.ListenAndServe(":8080", mux)
 }
 
+// NewRelicMiddlewareは、New Relicのトランザクションを開始し、リクエストの処理後に終了します。
+func NewRelicMiddleware(app *newrelic.Application) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// トランザクションの開始
+			txn := app.StartTransaction(r.URL.Path)
+			defer txn.End()
+
+			// リクエストにトランザクションを関連付け
+			r = newrelic.RequestWithTransactionContext(r, txn)
+
+			// レスポンスライターのラップ
+			nrw := txn.SetWebResponse(w)
+
+			// 次のハンドラーの呼び出し
+			next.ServeHTTP(nrw, r)
+		})
+	}
+}
+
 func setup() http.Handler {
 	host := os.Getenv("ISUCON_DB_HOST")
 	if host == "" {
@@ -80,9 +100,7 @@ func setup() http.Handler {
 	db = _db
 
 	mux := chi.NewRouter()
-	mux.Use(func(next http.Handler) http.Handler {
-		return newrelic.WrapHandle(App, "/", next)
-	})
+	mux.Use(NewRelicMiddleware(App))
 	mux.Use(middleware.Logger)
 	mux.Use(middleware.Recoverer)
 	mux.HandleFunc("POST /api/initialize", postInitialize)
