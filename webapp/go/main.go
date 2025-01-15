@@ -19,9 +19,9 @@ import (
 )
 
 var db *sqlx.DB
-
+var App *newrelic.Application
 func main() {
-	_, err := newrelic.NewApplication(
+	app, err := newrelic.NewApplication(
 		newrelic.ConfigAppName(os.Getenv("NEW_RELIC_APP_NAME")),
 		newrelic.ConfigLicense(os.Getenv("NEW_RELIC_LICENSE_KEY")),
 		newrelic.ConfigAppLogForwardingEnabled(true),
@@ -32,6 +32,7 @@ func main() {
 	} else {
 		   fmt.Println("newrelic init success")
 	} 
+	App = app
 
 	mux := setup()
 	slog.Info("Listening on :8080")
@@ -79,6 +80,9 @@ func setup() http.Handler {
 	db = _db
 
 	mux := chi.NewRouter()
+	mux.Use(func(next http.Handler) http.Handler {
+		return newrelic.WrapHandle(app, "/", next)
+	})
 	mux.Use(middleware.Logger)
 	mux.Use(middleware.Recoverer)
 	mux.HandleFunc("POST /api/initialize", postInitialize)
