@@ -81,7 +81,7 @@ func setup() http.Handler {
 
 	mux := chi.NewRouter()
 	mux.Use(func(next http.Handler) http.Handler {
-		return newrelic.WrapHandle(app, "/", next)
+		return newrelic.WrapHandle(App, "/", next)
 	})
 	mux.Use(middleware.Logger)
 	mux.Use(middleware.Recoverer)
