@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/newrelic/go-agent/v3/newrelic"
 )
 
 var erroredUpstream = errors.New("errored upstream")
@@ -22,6 +24,9 @@ type paymentGatewayGetPaymentsResponseOne struct {
 }
 
 func requestPaymentGatewayPostPayment(ctx context.Context, paymentGatewayURL string, token string, param *paymentGatewayPostPaymentRequest, retrieveRidesOrderByCreatedAtAsc func() ([]Ride, error)) error {
+	txn := newrelic.FromContext(ctx)
+	s1 := txn.StartSegment("requestPaymentGatewayPostPayment")
+	defer s1.End()
 	b, err := json.Marshal(param)
 	if err != nil {
 		return err

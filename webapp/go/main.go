@@ -11,27 +11,28 @@ import (
 	"os/exec"
 	"strconv"
 
-	"github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"github.com/newrelic/go-agent/v3/newrelic"
 )
 
 var db *sqlx.DB
 var App *newrelic.Application
+
 func main() {
 	app, err := newrelic.NewApplication(
 		newrelic.ConfigAppName(os.Getenv("NEW_RELIC_APP_NAME")),
 		newrelic.ConfigLicense(os.Getenv("NEW_RELIC_LICENSE_KEY")),
 		newrelic.ConfigAppLogForwardingEnabled(true),
-	  )
-	  
+	)
+
 	if err != nil {
-		   fmt.Errorf("failed to init newrelic NewApplication reason: %v", err)
+		_ = fmt.Errorf("failed to init newrelic NewApplication reason: %v", err)
 	} else {
-		   fmt.Println("newrelic init success")
-	} 
+		fmt.Println("newrelic init success")
+	}
 	App = app
 
 	mux := setup()

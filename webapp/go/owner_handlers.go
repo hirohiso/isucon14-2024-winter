@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/oklog/ulid/v2"
 )
 
@@ -26,6 +27,10 @@ type ownerPostOwnersResponse struct {
 
 func ownerPostOwners(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	txn := newrelic.FromContext(ctx)
+	s1 := txn.StartSegment("ownerPostOwners")
+	defer s1.End()
+
 	req := &ownerPostOwnersRequest{}
 	if err := bindJSON(r, req); err != nil {
 		writeError(w, http.StatusBadRequest, err)
@@ -81,6 +86,10 @@ type ownerGetSalesResponse struct {
 
 func ownerGetSales(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	txn := newrelic.FromContext(ctx)
+	s1 := txn.StartSegment("ownerGetSales")
+	defer s1.End()
+
 	since := time.Unix(0, 0)
 	until := time.Date(9999, 12, 31, 23, 59, 59, 0, time.UTC)
 	if r.URL.Query().Get("since") != "" {
@@ -192,6 +201,10 @@ type ownerGetChairResponseChair struct {
 
 func ownerGetChairs(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	txn := newrelic.FromContext(ctx)
+	s1 := txn.StartSegment("ownerGetChairs")
+	defer s1.End()
+
 	owner := ctx.Value("owner").(*Owner)
 
 	chairs := []chairWithDetail{}
