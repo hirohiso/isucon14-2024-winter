@@ -98,6 +98,12 @@ func setup() http.Handler {
 	if err != nil {
 		panic(err)
 	}
+
+	// Configure connection pool for better performance
+	_db.SetMaxOpenConns(100)    // Maximum number of open connections
+	_db.SetMaxIdleConns(50)     // Maximum number of idle connections
+	_db.SetConnMaxLifetime(300) // Maximum connection lifetime in seconds
+
 	db = _db
 
 	mux := chi.NewRouter()
@@ -208,7 +214,7 @@ func writeError(w http.ResponseWriter, statusCode int, err error) {
 	}
 	w.Write(buf)
 
-	slog.Error("error response wrote", err)
+	slog.Error("error response wrote", "error", err)
 }
 
 func secureRandomStr(b int) string {
