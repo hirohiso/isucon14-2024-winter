@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/oklog/ulid/v2"
 )
 
@@ -27,6 +28,10 @@ type appPostUsersResponse struct {
 
 func appPostUsers(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	txn := newrelic.FromContext(ctx)
+	s1 := txn.StartSegment("appPostUsers")
+	defer s1.End()
+
 	req := &appPostUsersRequest{}
 	if err := bindJSON(r, req); err != nil {
 		writeError(w, http.StatusBadRequest, err)
@@ -140,6 +145,10 @@ type appPostPaymentMethodsRequest struct {
 
 func appPostPaymentMethods(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	txn := newrelic.FromContext(ctx)
+	s1 := txn.StartSegment("appPostPaymentMethods")
+	defer s1.End()
+
 	req := &appPostPaymentMethodsRequest{}
 	if err := bindJSON(r, req); err != nil {
 		writeError(w, http.StatusBadRequest, err)
@@ -190,6 +199,10 @@ type getAppRidesResponseItemChair struct {
 
 func appGetRides(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	txn := newrelic.FromContext(ctx)
+	s1 := txn.StartSegment("appGetRides")
+	defer s1.End()
+
 	user := ctx.Value("user").(*User)
 
 	tx, err := db.Beginx()
@@ -293,6 +306,10 @@ func getLatestRideStatus(ctx context.Context, tx executableGet, rideID string) (
 
 func appPostRides(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	txn := newrelic.FromContext(ctx)
+	s1 := txn.StartSegment("appPostRides")
+	defer s1.End()
+
 	req := &appPostRidesRequest{}
 	if err := bindJSON(r, req); err != nil {
 		writeError(w, http.StatusBadRequest, err)
@@ -450,6 +467,10 @@ type appPostRidesEstimatedFareResponse struct {
 
 func appPostRidesEstimatedFare(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	txn := newrelic.FromContext(ctx)
+	s1 := txn.StartSegment("appPostRidesEstimatedFare")
+	defer s1.End()
+
 	req := &appPostRidesEstimatedFareRequest{}
 	if err := bindJSON(r, req); err != nil {
 		writeError(w, http.StatusBadRequest, err)
@@ -507,6 +528,10 @@ type appPostRideEvaluationResponse struct {
 
 func appPostRideEvaluatation(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	txn := newrelic.FromContext(ctx)
+	s1 := txn.StartSegment("appPostRideEvaluatation")
+	defer s1.End()
+
 	rideID := r.PathValue("ride_id")
 
 	req := &appPostRideEvaluationRequest{}
@@ -660,6 +685,10 @@ type appGetNotificationResponseChairStats struct {
 
 func appGetNotification(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	txn := newrelic.FromContext(ctx)
+	s1 := txn.StartSegment("appGetNotification")
+	defer s1.End()
+
 	user := ctx.Value("user").(*User)
 
 	tx, err := db.Beginx()
@@ -833,6 +862,10 @@ type appGetNearbyChairsResponseChair struct {
 
 func appGetNearbyChairs(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	txn := newrelic.FromContext(ctx)
+	s1 := txn.StartSegment("appGetNearbyChairs")
+	defer s1.End()
+
 	latStr := r.URL.Query().Get("latitude")
 	lonStr := r.URL.Query().Get("longitude")
 	distanceStr := r.URL.Query().Get("distance")
