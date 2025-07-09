@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/oklog/ulid/v2"
 )
 
@@ -22,6 +23,10 @@ type chairPostChairsResponse struct {
 
 func chairPostChairs(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	txn := newrelic.FromContext(ctx)
+	s1 := txn.StartSegment("chairPostChairs")
+	defer s1.End()
+
 	req := &chairPostChairsRequest{}
 	if err := bindJSON(r, req); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -73,6 +78,10 @@ type postChairActivityRequest struct {
 
 func chairPostActivity(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	txn := newrelic.FromContext(ctx)
+	s1 := txn.StartSegment("chairPostActivity")
+	defer s1.End()
+
 	chair := ctx.Value("chair").(*Chair)
 
 	req := &postChairActivityRequest{}
@@ -96,6 +105,10 @@ type chairPostCoordinateResponse struct {
 
 func chairPostCoordinate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	txn := newrelic.FromContext(ctx)
+	s1 := txn.StartSegment("chairPostCoordinate")
+	defer s1.End()
+
 	req := &Coordinate{}
 	if err := bindJSON(r, req); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -186,6 +199,10 @@ type chairGetNotificationResponseData struct {
 
 func chairGetNotification(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	txn := newrelic.FromContext(ctx)
+	s1 := txn.StartSegment("chairGetNotification")
+	defer s1.End()
+
 	chair := ctx.Value("chair").(*Chair)
 
 	tx, err := db.Beginx()
@@ -271,6 +288,10 @@ type postChairRidesRideIDStatusRequest struct {
 
 func chairPostRideStatus(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	txn := newrelic.FromContext(ctx)
+	s1 := txn.StartSegment("chairPostRideStatus")
+	defer s1.End()
+
 	rideID := r.PathValue("ride_id")
 
 	chair := ctx.Value("chair").(*Chair)
