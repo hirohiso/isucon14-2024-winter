@@ -4,14 +4,14 @@
 ## Language
 When performing a code review, respond in Japanese.
 
-## Abbreviations
-When performing a code review, use the following abbreviations:
+## Prefixes
+When performing a code review, use the following prefixes to indicate the type of comment:
 ```
-[must] → must change 
-[imo] → my opinion is this, but it's not mandatory (in my opinion) 
-[nits] → minor points (nitpick)
-[ask] → question  
-[fyi] → reference information
+[must] : must change 
+[imo] : my opinion is this, but it's not mandatory (in my opinion) 
+[nits] : minor points (nitpick)
+[ask] : question  
+[fyi] : reference information
 ```
 
 ## Review Perspectives
@@ -52,3 +52,15 @@ The modified module concentrates only on the domain logic and is designed with l
 A-2: Inadequate 
 The delivery and payment logic is mixed and there is insufficient separation of domain logic.
 ```
+
+## 🚫 Prohibited
+- English output
+- Missing or incorrect prefixes
+- Skipping evaluation items
+- Formatting violations
+- Ambiguating answers (e.g., “looks good,” “some,” etc.)
+
+---.
+
+**All of these instructions must be strictly adhered to. ** 
+Violations will result in review results being considered invalid.
