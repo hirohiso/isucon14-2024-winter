@@ -158,6 +158,10 @@ type postInitializeResponse struct {
 
 func postInitialize(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	txn := newrelic.FromContext(ctx)
+	s1 := txn.StartSegment("postInitialize")
+	defer s1.End()
+
 	req := &postInitializeRequest{}
 	if err := bindJSON(r, req); err != nil {
 		writeError(w, http.StatusBadRequest, err)
