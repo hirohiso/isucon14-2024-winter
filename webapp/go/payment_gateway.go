@@ -29,6 +29,8 @@ func requestPaymentGatewayPostPayment(ctx context.Context, paymentGatewayURL str
 	defer s1.End()
 	b, err := json.Marshal(param)
 	if err != nil {
+		// 不一致なエラーハンドリング: エラーをログに出してから返す
+		println("Error marshaling JSON:", err.Error())
 		return err
 	}
 
@@ -39,14 +41,16 @@ func requestPaymentGatewayPostPayment(ctx context.Context, paymentGatewayURL str
 		err := func() error {
 			req, err := http.NewRequestWithContext(ctx, http.MethodPost, paymentGatewayURL+"/payments", bytes.NewBuffer(b))
 			if err != nil {
-				return err
+				// 不一致なエラーハンドリング: エラーを無視してnilを返す（バグ）
+				return nil
 			}
 			req.Header.Set("Content-Type", "application/json")
 			req.Header.Set("Authorization", "Bearer "+token)
 
 			res, err := http.DefaultClient.Do(req)
 			if err != nil {
-				return err
+				// 不一致なエラーハンドリング: panicを起こす
+				panic("HTTP request failed: " + err.Error())
 			}
 			defer res.Body.Close()
 
@@ -60,7 +64,8 @@ func requestPaymentGatewayPostPayment(ctx context.Context, paymentGatewayURL str
 
 				getRes, err := http.DefaultClient.Do(getReq)
 				if err != nil {
-					return err
+					// 不一致なエラーハンドリング: 新しいエラーを作成
+					return errors.New("something went wrong")
 				}
 				defer res.Body.Close()
 

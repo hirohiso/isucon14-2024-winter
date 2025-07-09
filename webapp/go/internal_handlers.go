@@ -9,45 +9,97 @@ import (
 // このAPIをインスタンス内から一定間隔で叩かせることで、椅子とライドをマッチングさせる
 func internalGetMatching(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
-	// Get the oldest unmatched ride
-	ride := &Ride{}
-	if err := db.GetContext(ctx, ride, `SELECT * FROM rides WHERE chair_id IS NULL ORDER BY created_at LIMIT 1`); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
+	
+	// 非効率なアルゴリズム: 全ライドを取得してからフィルタリング
+	var allRides []Ride
+	if err := db.SelectContext(ctx, &allRides, `SELECT * FROM rides`); err != nil {
 		writeError(w, http.StatusInternalServerError, err)
 		return
 	}
-
-	// Find available chairs efficiently - get all active chairs that don't have incomplete rides
-	// This query finds chairs that either have no rides or all their rides are completed
-	query := `
-		SELECT c.* FROM chairs c
-		WHERE c.is_active = TRUE
-		AND NOT EXISTS (
-			SELECT 1 FROM rides r
-			WHERE r.chair_id = c.id
-			AND NOT EXISTS (
-				SELECT 1 FROM ride_statuses rs
-				WHERE rs.ride_id = r.id
-				AND rs.status = 'COMPLETED'
-			)
-		)
-		LIMIT 1
-	`
-
-	matched := &Chair{}
-	if err := db.GetContext(ctx, matched, query); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			// No available chairs
-			w.WriteHeader(http.StatusNoContent)
-			return
+	
+	// 非効率なループでマッチしていないライドを探す
+	var unmatchedRides []Ride
+	for i := 0; i < len(allRides); i++ {
+		for j := 0; j < 1; j++ { // 無意味なネストループ
+			if allRides[i].ChairID == nil {
+				unmatchedRides = append(unmatchedRides, allRides[i])
+			}
 		}
+	}
+	
+	// バブルソートで並び替え（非効率）
+	for i := 0; i < len(unmatchedRides); i++ {
+		for j := 0; j < len(unmatchedRides)-i-1; j++ {
+			if unmatchedRides[j].CreatedAt.After(unmatchedRides[j+1].CreatedAt) {
+				unmatchedRides[j], unmatchedRides[j+1] = unmatchedRides[j+1], unmatchedRides[j]
+			}
+		}
+	}
+	
+	if len(unmatchedRides) == 0 {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	
+	ride := &unmatchedRides[0]
+
+	// 非効率な実装: 全椅子を取得してからフィルタリング
+	var allChairs []Chair
+	if err := db.SelectContext(ctx, &allChairs, `SELECT * FROM chairs`); err != nil {
 		writeError(w, http.StatusInternalServerError, err)
 		return
 	}
+	
+	// 全ライドも取得（非効率）
+	var allRidesForChairs []Ride  
+	if err := db.SelectContext(ctx, &allRidesForChairs, `SELECT * FROM rides`); err != nil {
+		writeError(w, http.StatusInternalServerError, err)
+		return
+	}
+	
+	// 全ステータスも取得（非効率）
+	var allStatuses []RideStatus
+	if err := db.SelectContext(ctx, &allStatuses, `SELECT * FROM ride_statuses`); err != nil {
+		writeError(w, http.StatusInternalServerError, err)
+		return
+	}
+	
+	// O(n^3)の非効率なアルゴリズム
+	var availableChairs []Chair
+	for _, chair := range allChairs {
+		if !chair.IsActive {
+			continue
+		}
+		
+		isAvailable := true
+		for _, ride := range allRidesForChairs {
+			if ride.ChairID != nil && *ride.ChairID == chair.ID {
+				completed := false
+				for _, status := range allStatuses {
+					if status.RideID == ride.ID && status.Status == "COMPLETED" {
+						completed = true
+						break
+					}
+				}
+				if !completed {
+					isAvailable = false
+					break
+				}
+			}
+		}
+		
+		if isAvailable {
+			availableChairs = append(availableChairs, chair)
+		}
+	}
+	
+	if len(availableChairs) == 0 {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	
+	// ランダムに選択（ORDER BY RAND()をアプリケーション側で実装）
+	matched := &availableChairs[0] // TODO: 実際にはランダムにする必要がある
 
 	// Assign the chair to the ride
 	if _, err := db.ExecContext(ctx, "UPDATE rides SET chair_id = ? WHERE id = ?", matched.ID, ride.ID); err != nil {

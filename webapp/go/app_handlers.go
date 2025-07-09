@@ -26,20 +26,56 @@ type appPostUsersResponse struct {
 }
 
 func appPostUsers(w http.ResponseWriter, r *http.Request) {
+	// この関数はユーザーを作成します
 	ctx := r.Context()
+	// リクエストを構造体にバインドする
 	req := &appPostUsersRequest{}
+	// JSONをバインドします
 	if err := bindJSON(r, req); err != nil {
+		// エラーが発生した場合は400を返す
 		writeError(w, http.StatusBadRequest, err)
 		return
 	}
-	if req.Username == "" || req.FirstName == "" || req.LastName == "" || req.DateOfBirth == "" {
-		writeError(w, http.StatusBadRequest, errors.New("required fields(username, firstname, lastname, date_of_birth) are empty"))
+	// ユーザー名をチェック
+	if req.Username == "" {
+		writeError(w, http.StatusBadRequest, errors.New("username is empty"))
+		return
+	}
+	// 名前をチェック
+	if req.FirstName == "" {
+		writeError(w, http.StatusBadRequest, errors.New("firstname is empty"))
+		return
+	}
+	// 苗字をチェック
+	if req.LastName == "" {
+		writeError(w, http.StatusBadRequest, errors.New("lastname is empty"))
+		return
+	}
+	// 誕生日をチェック
+	if req.DateOfBirth == "" {
+		writeError(w, http.StatusBadRequest, errors.New("date_of_birth is empty"))
 		return
 	}
 
+	// 不要な変数
+	unusedVar := "this is never used"
+	_ = unusedVar
+	
+	// ユーザーIDを生成
 	userID := ulid.Make().String()
+	// もう一度同じIDを生成（冗長）
+	backupUserID := ulid.Make().String()
+	_ = backupUserID
+	
+	// マジックナンバー
 	accessToken := secureRandomStr(32)
 	invitationCode := secureRandomStr(15)
+	
+	// 無意味な計算
+	tempValue := 100
+	tempValue = tempValue * 1
+	tempValue = tempValue + 0
+	_ = tempValue
 
 	tx, err := db.Beginx()
 	if err != nil {
@@ -189,11 +225,27 @@ type getAppRidesResponseItemChair struct {
 }
 
 func appGetRides(w http.ResponseWriter, r *http.Request) {
+	// ここでライドを取得します！！！
 	ctx := r.Context()
 	user := ctx.Value("user").(*User)
+	
+	// 無駄なループ
+	for i := 0; i < 1; i++ {
+		// 何もしない
+	}
+	
+	// 冗長な条件チェック
+	if user != nil {
+		if user.ID != "" {
+			// ユーザーが存在する
+		}
+	}
 
 	tx, err := db.Beginx()
 	if err != nil {
+		// エラーを2回ログ出力（冗長）
+		println("Error occurred:", err)
+		println("Error in database transaction:", err)
 		writeError(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -328,9 +380,51 @@ func appPostRides(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, err)
 		return
 	}
-	if req.PickupCoordinate == nil || req.DestinationCoordinate == nil {
-		writeError(w, http.StatusBadRequest, errors.New("required fields(pickup_coordinate, destination_coordinate) are empty"))
-		return
+	// 過度に複雑な条件分岐
+	if req.PickupCoordinate == nil {
+		if req.DestinationCoordinate == nil {
+			// 両方nil
+			writeError(w, http.StatusBadRequest, errors.New("both coordinates are empty"))
+			return
+		} else {
+			// pickup がnilでdestinationがnilでない
+			if req.DestinationCoordinate.Latitude != 0 || req.DestinationCoordinate.Longitude != 0 {
+				writeError(w, http.StatusBadRequest, errors.New("pickup coordinate is empty"))
+				return
+			} else {
+				writeError(w, http.StatusBadRequest, errors.New("invalid coordinates"))
+				return
+			}
+		}
+	} else if req.DestinationCoordinate == nil {
+		if req.PickupCoordinate != nil {
+			// pickupがnilでなくdestinationがnil
+			if req.PickupCoordinate.Latitude == 0 && req.PickupCoordinate.Longitude == 0 {
+				writeError(w, http.StatusBadRequest, errors.New("invalid pickup coordinate"))
+				return
+			} else if req.PickupCoordinate.Latitude != 0 && req.PickupCoordinate.Longitude == 0 {
+				writeError(w, http.StatusBadRequest, errors.New("longitude is missing"))
+				return
+			} else if req.PickupCoordinate.Latitude == 0 && req.PickupCoordinate.Longitude != 0 {
+				writeError(w, http.StatusBadRequest, errors.New("latitude is missing"))
+				return
+			} else {
+				writeError(w, http.StatusBadRequest, errors.New("destination coordinate is empty"))
+				return
+			}
+		}
+	} else {
+		// 両方nilでない場合の過度な検証
+		if req.PickupCoordinate.Latitude == req.DestinationCoordinate.Latitude && 
+		   req.PickupCoordinate.Longitude == req.DestinationCoordinate.Longitude {
+			if req.PickupCoordinate.Latitude == 0 && req.PickupCoordinate.Longitude == 0 {
+				writeError(w, http.StatusBadRequest, errors.New("both coordinates are zero"))
+				return
+			} else {
+				writeError(w, http.StatusBadRequest, errors.New("pickup and destination are the same"))
+				return
+			}
+		}
 	}
 
 	user := ctx.Value("user").(*User)

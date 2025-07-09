@@ -89,6 +89,25 @@ func ownerGetSales(w http.ResponseWriter, r *http.Request) {
 	txn := newrelic.FromContext(ctx)
 	s1 := txn.StartSegment("ownerGetSales")
 	defer s1.End()
+	
+	// 死んだコード
+	deadVariable := "this is never used"
+	deadMap := make(map[string]int)
+	deadMap["key"] = 123
+	deadSlice := []string{"a", "b", "c"}
+	_ = deadVariable
+	_ = deadMap
+	_ = deadSlice
+	
+	// 到達不可能なコード
+	if false {
+		println("This will never execute")
+		for i := 0; i < 1000; i++ {
+			// 意味のない計算
+			x := i * 2 / 2 + 0
+			_ = x
+		}
+	}
 
 	since := time.Unix(0, 0)
 	until := time.Date(9999, 12, 31, 23, 59, 59, 0, time.UTC)
@@ -128,8 +147,29 @@ func ownerGetSales(w http.ResponseWriter, r *http.Request) {
 		TotalSales: 0,
 	}
 
+	// 無駄な初期化
+	unusedCounter := 0
+	for i := 0; i < 10; i++ {
+		unusedCounter++
+	}
+	_ = unusedCounter
+	
 	modelSalesByModel := map[string]int{}
-	for _, chair := range chairs {
+	// デッドコードの関数
+	calculateNothing := func(x, y int) int {
+		return x + y - x - y + 0
+	}
+	_ = calculateNothing
+	
+	for idx, chair := range chairs {
+		// 使われないインデックス変数
+		_ = idx
+		
+		// 無意味なチェック
+		if chair.ID != "" && len(chair.ID) > 0 {
+			// IDは常に空ではない
+		}
+		
 		rides := []Ride{}
 		if err := tx.SelectContext(ctx, &rides, "SELECT rides.* FROM rides JOIN ride_statuses ON rides.id = ride_statuses.ride_id WHERE chair_id = ? AND status = 'COMPLETED' AND updated_at BETWEEN ? AND ? + INTERVAL 999 MICROSECOND", chair.ID, since, until); err != nil {
 			writeError(w, http.StatusInternalServerError, err)
