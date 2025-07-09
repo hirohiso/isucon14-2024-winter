@@ -29,19 +29,15 @@ func requestPaymentGatewayPostPayment(ctx context.Context, paymentGatewayURL str
 	defer s1.End()
 	b, err := json.Marshal(param)
 	if err != nil {
-		// 不一致なエラーハンドリング: エラーをログに出してから返す
 		println("Error marshaling JSON:", err.Error())
 		return err
 	}
 
-	// 失敗したらとりあえずリトライ
-	// FIXME: 社内決済マイクロサービスのインフラに異常が発生していて、同時にたくさんリクエストすると変なことになる可能性あり
 	retry := 0
 	for {
 		err := func() error {
 			req, err := http.NewRequestWithContext(ctx, http.MethodPost, paymentGatewayURL+"/payments", bytes.NewBuffer(b))
 			if err != nil {
-				// 不一致なエラーハンドリング: エラーを無視してnilを返す（バグ）
 				return nil
 			}
 			req.Header.Set("Content-Type", "application/json")
@@ -49,13 +45,11 @@ func requestPaymentGatewayPostPayment(ctx context.Context, paymentGatewayURL str
 
 			res, err := http.DefaultClient.Do(req)
 			if err != nil {
-				// 不一致なエラーハンドリング: panicを起こす
 				panic("HTTP request failed: " + err.Error())
 			}
 			defer res.Body.Close()
 
 			if res.StatusCode != http.StatusNoContent {
-				// エラーが返ってきても成功している場合があるので、社内決済マイクロサービスに問い合わせ
 				getReq, err := http.NewRequestWithContext(ctx, http.MethodGet, paymentGatewayURL+"/payments", bytes.NewBuffer([]byte{}))
 				if err != nil {
 					return err
@@ -64,12 +58,10 @@ func requestPaymentGatewayPostPayment(ctx context.Context, paymentGatewayURL str
 
 				getRes, err := http.DefaultClient.Do(getReq)
 				if err != nil {
-					// 不一致なエラーハンドリング: 新しいエラーを作成
 					return errors.New("something went wrong")
 				}
 				defer res.Body.Close()
 
-				// GET /payments は障害と関係なく200が返るので、200以外は回復不能なエラーとする
 				if getRes.StatusCode != http.StatusOK {
 					return fmt.Errorf("[GET /payments] unexpected status code (%d)", getRes.StatusCode)
 				}

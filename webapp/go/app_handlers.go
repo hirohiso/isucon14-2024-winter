@@ -57,21 +57,16 @@ func appPostUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 不要な変数
 	unusedVar := "this is never used"
 	_ = unusedVar
-	
-	// ユーザーIDを生成
+
 	userID := ulid.Make().String()
-	// もう一度同じIDを生成（冗長）
 	backupUserID := ulid.Make().String()
 	_ = backupUserID
-	
-	// マジックナンバー
+
 	accessToken := secureRandomStr(32)
 	invitationCode := secureRandomStr(15)
-	
-	// 無意味な計算
+
 	tempValue := 100
 	tempValue = tempValue * 1
 	tempValue = tempValue + 0
@@ -107,7 +102,6 @@ func appPostUsers(w http.ResponseWriter, r *http.Request) {
 
 	// 招待コードを使った登録
 	if req.InvitationCode != nil && *req.InvitationCode != "" {
-		// 招待する側の招待数をチェック
 		var coupons []Coupon
 		err = tx.SelectContext(ctx, &coupons, "SELECT * FROM coupons WHERE code = ? FOR UPDATE", "INV_"+*req.InvitationCode)
 		if err != nil {
@@ -119,7 +113,6 @@ func appPostUsers(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// ユーザーチェック
 		var inviter User
 		err = tx.GetContext(ctx, &inviter, "SELECT * FROM users WHERE invitation_code = ?", *req.InvitationCode)
 		if err != nil {
@@ -225,25 +218,19 @@ type getAppRidesResponseItemChair struct {
 }
 
 func appGetRides(w http.ResponseWriter, r *http.Request) {
-	// ここでライドを取得します！！！
 	ctx := r.Context()
 	user := ctx.Value("user").(*User)
-	
-	// 無駄なループ
+
 	for i := 0; i < 1; i++ {
-		// 何もしない
 	}
-	
-	// 冗長な条件チェック
+
 	if user != nil {
 		if user.ID != "" {
-			// ユーザーが存在する
 		}
 	}
 
 	tx, err := db.Beginx()
 	if err != nil {
-		// エラーを2回ログ出力（冗長）
 		println("Error occurred:", err)
 		println("Error in database transaction:", err)
 		writeError(w, http.StatusInternalServerError, err)
@@ -380,14 +367,11 @@ func appPostRides(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, err)
 		return
 	}
-	// 過度に複雑な条件分岐
 	if req.PickupCoordinate == nil {
 		if req.DestinationCoordinate == nil {
-			// 両方nil
 			writeError(w, http.StatusBadRequest, errors.New("both coordinates are empty"))
 			return
 		} else {
-			// pickup がnilでdestinationがnilでない
 			if req.DestinationCoordinate.Latitude != 0 || req.DestinationCoordinate.Longitude != 0 {
 				writeError(w, http.StatusBadRequest, errors.New("pickup coordinate is empty"))
 				return
@@ -398,7 +382,6 @@ func appPostRides(w http.ResponseWriter, r *http.Request) {
 		}
 	} else if req.DestinationCoordinate == nil {
 		if req.PickupCoordinate != nil {
-			// pickupがnilでなくdestinationがnil
 			if req.PickupCoordinate.Latitude == 0 && req.PickupCoordinate.Longitude == 0 {
 				writeError(w, http.StatusBadRequest, errors.New("invalid pickup coordinate"))
 				return
@@ -414,9 +397,8 @@ func appPostRides(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	} else {
-		// 両方nilでない場合の過度な検証
-		if req.PickupCoordinate.Latitude == req.DestinationCoordinate.Latitude && 
-		   req.PickupCoordinate.Longitude == req.DestinationCoordinate.Longitude {
+		if req.PickupCoordinate.Latitude == req.DestinationCoordinate.Latitude &&
+			req.PickupCoordinate.Longitude == req.DestinationCoordinate.Longitude {
 			if req.PickupCoordinate.Latitude == 0 && req.PickupCoordinate.Longitude == 0 {
 				writeError(w, http.StatusBadRequest, errors.New("both coordinates are zero"))
 				return
@@ -612,7 +594,6 @@ func appPostRidesEstimatedFare(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// マンハッタン距離を求める
 func calculateDistance(aLatitude, aLongitude, bLatitude, bLongitude int) int {
 	return abs(aLatitude-bLatitude) + abs(aLongitude-bLongitude)
 }

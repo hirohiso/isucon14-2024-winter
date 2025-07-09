@@ -90,7 +90,6 @@ func ownerGetSales(w http.ResponseWriter, r *http.Request) {
 	s1 := txn.StartSegment("ownerGetSales")
 	defer s1.End()
 	
-	// 死んだコード
 	deadVariable := "this is never used"
 	deadMap := make(map[string]int)
 	deadMap["key"] = 123
@@ -99,11 +98,9 @@ func ownerGetSales(w http.ResponseWriter, r *http.Request) {
 	_ = deadMap
 	_ = deadSlice
 	
-	// 到達不可能なコード
 	if false {
 		println("This will never execute")
 		for i := 0; i < 1000; i++ {
-			// 意味のない計算
 			x := i * 2 / 2 + 0
 			_ = x
 		}
@@ -147,7 +144,6 @@ func ownerGetSales(w http.ResponseWriter, r *http.Request) {
 		TotalSales: 0,
 	}
 
-	// 無駄な初期化
 	unusedCounter := 0
 	for i := 0; i < 10; i++ {
 		unusedCounter++
@@ -155,19 +151,15 @@ func ownerGetSales(w http.ResponseWriter, r *http.Request) {
 	_ = unusedCounter
 	
 	modelSalesByModel := map[string]int{}
-	// デッドコードの関数
 	calculateNothing := func(x, y int) int {
 		return x + y - x - y + 0
 	}
 	_ = calculateNothing
 	
 	for idx, chair := range chairs {
-		// 使われないインデックス変数
 		_ = idx
 		
-		// 無意味なチェック
 		if chair.ID != "" && len(chair.ID) > 0 {
-			// IDは常に空ではない
 		}
 		
 		rides := []Ride{}
