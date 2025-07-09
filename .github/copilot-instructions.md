@@ -1,39 +1,54 @@
 
-<!-- github copilotへの指示 : 日本語でレビューをしてください -->
-<!-- github copilotへの指示 : 以下の観点でレビューをしてください -->
 
-### A-設計観点
-1. レイヤーを意識した設計になっているか
-2. ドメインロジックは適切に分離されているか
-3. 依存関係は適切に管理されているか
+# Copilot Instructions when performing a code review
+## Language
+When performing a code review, respond in Japanese.
 
-### B-実装観点
-1. コードの可読性は高いか
-2. 重複したコードはないか
-3. 変数名は曖昧でなく意図が明確か
-4. 冗長なコメントはないか
-5. 例外処理は適切か
-
-### C-セキュリティ観点
-1. 入力値の検証は適切に行われているか
-2. 機密情報は適切に管理されているか
-
-### D-パフォーマンス観点
-1. パフォーマンスに影響を与える部分は適切に最適化されているか
-2. リソースの無駄遣いはないか
-
-### E-UT観点
-1. テストは十分に記載されているか
-2. テストケースで仕様を表しているか
-3. 外部プロセスに依存したテストケースとなっていないか
-
-これらの観点を満たしていたか各観点ごとの評価をお願いします。
-
-サンプル
+## Abbreviations
+When performing a code review, use the following abbreviations:
 ```
-A-1: 適切　
-修正されたモジュールは、ドメインロジックのみに集中しており、レイヤーを意識した設計になっています。
+[must] → must change 
+[imo] → my opinion is this, but it's not mandatory (in my opinion) 
+[nits] → minor points (nitpick)
+[ask] → question  
+[fyi] → reference information
+```
 
-A-2: 不適切
-配送と決済のロジックが混在しており、ドメインロジックの分離が不十分です。
+## Review Perspectives
+When performing a code review, follow our internal review checklist.
+### A-Design Perspectives
+1. is it designed with layers in mind? 2.
+2. is the domain logic properly separated? 3. are dependencies properly managed?
+Are dependencies properly managed?
+
+### B-Implementation Perspective
+1. is the code highly readable? 2.
+2. is there any duplicated code? 3. are variable names unambiguous?
+Are variable names unambiguous and clear in intent? 4.
+4. are there no redundant comments? 5. is exception handling appropriate?
+Is exception handling appropriate?
+
+### C-Security Perspectives
+1. are input values properly verified? 2.
+2. is confidential information properly managed?
+
+### D-Performance Perspective
+1. are performance-impacting areas optimized appropriately? 2.
+2. are resources being wasted?
+
+### E-UT Perspective
+1. are the tests well documented 2. are the test cases representing the specification?
+2. do the test cases represent the specification?
+3. are the test cases dependent on external processes?
+
+Please evaluate whether these perspectives have been met.
+
+Sample 
+
+```
+A-1: Appropriate 
+The modified module concentrates only on the domain logic and is designed with layers in mind.
+
+A-2: Inadequate 
+The delivery and payment logic is mixed and there is insufficient separation of domain logic.
 ```
